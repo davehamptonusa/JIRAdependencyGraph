@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.3.2
+// @version      1.3.3
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -67,6 +67,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
   statusClassMap = {
     "1": 'open',
     "4": 'open', //This is actually reopened...
+    "10100": 'open', //This is COB "to-do"...
     "5": 'resolved',
     "6": 'closed',
     "3": 'inprogress',
