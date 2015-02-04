@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.3.0
+// @version      1.3.1
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
@@ -305,7 +305,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       jQuery(container).hide();
     }
 });
-    jQuery('#linkingmodule_heading').append('(<a style="cursor:pointer;">view dependencies</a>)').on('click', function(e) {
+    jQuery('#linkingmodule_heading').append('(<a class="viewDependencies" style="cursor:pointer;">view dependencies</a>)');
+    jQuery('#linkingmodule_heading a.viewDependencies').on('click', function(e) {
       jQuery(container).empty().show();
       main();
       return false;
