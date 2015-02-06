@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.4.0
+// @version      1.4.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -13,6 +13,7 @@
 // ==/UserScript==
 //
 GM_addStyle('svg {border: 1px solid #999; overflow: hidden; background-color:#fff;float:left;}');
+GM_addStyle('.missingStories dd {margin-left: 4px; font-size: small;}');
 GM_addStyle('.node {  white-space: nowrap; text-align: center}');
 GM_addStyle('.node.open rect,.node.open circle,.node.open ellipse, .node.open diamond {stroke: #333;fill: #78CFFF; stroke-width: 1.5px;}');
 GM_addStyle('.node.blocked rect,.node.blocked circle,.node.blocked ellipse , .node.blocked diamond {stroke: #333;fill: #F62500; stroke-width: 1.5px;}');
@@ -77,6 +78,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     "10274": 'qablocked'
 
   },
+  seen = {},
   build_graph_data = function (start_issue_key, jira, excludes){
     // Given a starting image key and the issue-fetching function build up the GraphViz data representing relationships
     // between issues. This will consider both subtasks and issue links.
@@ -174,7 +176,6 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     },
             
     // since the graph can be cyclic we need to prevent infinite recursion
-    seen = {},
     getEpicStories = function (issue_key) {
      var request = jira.get_issue(issue_key),
         epicStories = {},
@@ -193,31 +194,29 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     },
     walk = function (issue_key, graph){
         // issue is the JSON representation of the issue """
-        var request = jira.get_issue(issue_key),
+        var request,
         jqDef = jQuery.Deferred();
-        request.done(function (issue) {
-          var children = [],
-          fields = issue.fields,
-          defChildren = [];
+        // Check to see if we have seen this issue...
+        if (!_.has(seen, issue_key)) {
+          seen[issue_key] = '1';
+          request = jira.get_issue(issue_key);
+          request.done(function (issue) {
+            var children = [],
+            fields = issue.fields,
+            defChildren = [];
 
-          // Check to see if we have seen this issue...
-          if (!_.has(seen, issue_key)) {
+            //// Check to see if we have seen this issue...
+            //if (!_.has(seen, issue_key)) {
 
-            seen[issue_key] = '1';
             //remove the key fromthe list of epic stories so we end up with a list of unseen epic stories
             graph.push(process_node(issue_key, issue.fields));
-            //if fields.has_key('subtasks'):
-            //    for subtask in fields['subtasks']:
-            //        subtask_key = get_key(subtask)
-            //        log(issue_key + ' => has subtask => ' + subtask_key)
-            //        node = '"%s"->"%s"[color=blue][label="subtask"]' % (issue_key, subtask_key)
-            //        graph.push(node)
-            //        children.push(subtask_key)
             if (_.has(fields, 'issuelinks')) {
                 _.each(fields.issuelinks, function (other_link) {
                     result = process_link(issue_key, other_link);
                     if (result !== null) {
-                        children.push(result[0]);
+                        if (!_.has(seen, result[0])) {
+                          children.push(result[0]);
+                        }
                         if (result[1] !== null) {
                             graph.push(result[1]);
                         } 
@@ -229,16 +228,22 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
               var defChild = walk(child, graph);
               defChildren.push(defChild);
             });
-          }
-          // resolve the deferred when the children are done
-          // if there are no children this resolves right away.
-          jQuery.when.apply(window, defChildren).done(function () {
-            jqDef.resolve([graph, seen]);
-          });
+            //} Other half of if
+            // resolve the deferred when the children are done
+            // if there are no children this resolves right away.
+            jQuery.when.apply(window, defChildren).done(function () {
+              jqDef.resolve(graph);
+            });
+            
 
-        });
+          });
+        } else {
+          jqDef.resolve();
+        }
         return jqDef;
     };
+    //reset the 'seen' hash for multiple runs
+    seen = {};
     
     epicStoriesDef = getEpicStories(start_issue_key);
     walkDef = walk(start_issue_key, []);
@@ -255,7 +260,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     
     //location.empty().css("display", "block");
     location.append('<svg width=' + svgWidth + ' height=' + height + '><g></g></svg>');
-    location.append('<div class="missingStories" style="float:left;width:' + 195 + 'px;height:' + height + 'px;"></div>');
+    location.append('<div class="missingStories" style="padding-left: 4px; float:left;width:' + 190 + 'px;height:' + height + 'px;"></div>');
     //Set up zoom on svg
     svg = d3.select("#graph_container svg");
     inner = d3.select("#graph_container svg g");
@@ -294,14 +299,16 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       d3.select("#graph_container svg g").call(render, g);  
 
       //Add the missing items
-      jQuery('div.missingStories', location).append('<ul>Missing Stories</ul>');
-      ul = jQuery('ul', location);
+      jQuery('div.missingStories', location).append('<dl><h3>Missing Stories</h3></dl>');
+      ul = jQuery('dl', location);
       _.each(epicStories, function (value, key) {
         if (_.has(seen, key)) {
           return;
         }
         else {
-          ul.append('<li title="' + value + '">' + key + '</li>');
+          ul.append('<dt><a href=\'/browse/' + key + 
+          '\'class=\'issue-link link-title\'>' + key +
+          '</a></dt><dd>' + value + '</dd>');
         }
       });
 
@@ -318,8 +325,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     jira = JiraSearch(options.jira_url);
     graphPromise = build_graph_data(options.issue, jira, options.excludes);
 
-    graphPromise.done(function (epics, walkData) {
-      print_graph(walkData[0], epics, walkData[1]);
+    graphPromise.done(function (epics, graph) {
+      print_graph(graph, epics, seen);
     });
   };
   //Wire to work on right click of Links Hierarchy
