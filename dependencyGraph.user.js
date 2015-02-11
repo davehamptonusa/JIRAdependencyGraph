@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.4.3
+// @version      1.4.4
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -181,7 +181,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
         epicStories = {},
         jqDef = jQuery.Deferred();
         request.done(function (issue) {
-          var epicRequest = jira.search('"Epic Link"="'+ issue.fields.customfield_11522+'"');
+          var epicId = (issue.fields.issuetype.name === 'Epic') ? issue_key : issue.fields.customfield_11522;
+          var epicRequest = jira.search('"Epic Link"="'+ epicId +'"');
           epicRequest.done(function (result) {
             _.each(result.issues, function (epicIssue) {
               epicStories[epicIssue.key] = epicIssue.fields.summary;
