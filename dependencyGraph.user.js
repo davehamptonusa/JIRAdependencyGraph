@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.5.0
+// @version      1.5.1
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -320,7 +320,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     options.jira_url = window.location.origin;
     options.excludes = ["requires", "is related to", "subtask", "duplicates"];
     //Use the epic if passed in
-    options.issue = epic || (window.location.pathname).split("/")[2];
+    
+    options.issue = jQuery.type(epic) === "String" ? epic : (window.location.pathname).split("/")[2];
     
     
     
