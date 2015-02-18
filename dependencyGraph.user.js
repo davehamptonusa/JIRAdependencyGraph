@@ -2,11 +2,11 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.4.4
+// @version      1.5.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
-// @match        http://10.110.101.95/browse/*-*
+// @match        http://jira.cnvrmedia.net/secure/Dashboard.jspa?*
 // @grant        GM_addStyle
 // @require	  	 http://code.jquery.com/jquery-latest.js
 // @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
@@ -315,11 +315,12 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
 
 
   },
-  main = function (){
+  main = function (epic){
     var options = {}, jira, graphPromise;
     options.jira_url = window.location.origin;
     options.excludes = ["requires", "is related to", "subtask", "duplicates"];
-    options.issue = (window.location.pathname).split("/")[2];
+    //Use the epic if passed in
+    options.issue = epic || (window.location.pathname).split("/")[2];
     
     
     
@@ -353,19 +354,34 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
         }
       }
     );
+    launchGraph = function (epic) {
+        jQuery(container).empty().show();
+        main(epic);
+        return false;
+    };
     jQuery('body').append(container);
 
     //Poorly wire up dismissing the pop up
     jQuery('body').keydown(function(e){
-    if(e.which == 27){
-      jQuery(container).hide();
-    }
-});
+      if(e.which == 27){
+        jQuery(container).hide();
+      }
+    });
+    
     jQuery('#linkingmodule_heading').append('(<a class="viewDependencies" style="cursor:pointer;">view dependencies</a>)');
-    jQuery('#linkingmodule_heading a.viewDependencies').on('click', function(e) {
-      jQuery(container).empty().show();
-      main();
-      return false;
+
+    jQuery('#linkingmodule_heading a.viewDependencies').on('click', launchGraph);
+    var gadgets = jQuery('.gadget-iframe');
+    gadgets.each(function () {
+      var iframe = jQuery(this);
+      jQuery(iframe).load(function () {
+        var contents = iframe.contents();
+        jQuery('div.gadget', contents).on('click','img[alt="Epic"]', function (e){
+          var epic = jQuery(this).parent().attr('data-issue-key');
+          launchGraph(epic);
+          return false;
+        });
+      });
     });
   });
 })();
