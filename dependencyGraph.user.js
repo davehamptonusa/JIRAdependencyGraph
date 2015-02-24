@@ -1,12 +1,18 @@
+/* jslint undef: true, evil: true, browser: true, unparam: true, sloppy: true, white: true, nomen: true, regexp: true, maxerr: 50, plusplus: true, indent: 4 */
+/* global jQuery:true, GM_addStyle:true */
+/*
+ * Copyright 2015  Dave Hampton  All rights reserved
+ */
+
 // ==UserScript==
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.5.2
+// @version      1.5.3
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
-// @match        http://jira.cnvrmedia.net/secure/Dashboard.jspa?*
+// @match        http://jira.cnvrmedia.net/secure/Dashboard*
 // @grant        GM_addStyle
 // @require	  	 http://code.jquery.com/jquery-latest.js
 // @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
