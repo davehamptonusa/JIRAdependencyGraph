@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.6.0
+// @version      1.7.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -47,7 +47,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     var self = {};
 
     self.url = url + '/rest/api/latest';
-    self.fields = ['summary', 'key', 'issuetype', 'issuelinks', 'status', 'assignee', 'customfield_10002', 'customfield_11522'].join(",");
+    self.fields = ['summary', 'key', 'issuetype', 'issuelinks', 'status', 'assignee', 'customfield_10002', 'customfield_11522', 'customfield_11521'].join(",");
     self.get = function (uri, params) {
       params = !!params ? params : {};
       return jQuery.getJSON(self.url + uri, params);
@@ -131,6 +131,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
         var assigneeString,
         shape,
         summary = fields.summary,
+        sprint, sprintNameStart, sprintNameEnd, sprintName = "",
         statusClass = (_.isUndefined(fields.status.id)) ? 'open' : statusClassMap[fields.status.id];
 
         console.log("processing Node: " + issue_key);
@@ -141,6 +142,13 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
 
         summary = summary.replace("\"","'");
         summary = split_string(summary, 25);
+        try {
+          sprint = fields.customfield_11521[0];
+          sprintNameStart = sprint.indexOf('name=') + 5;
+          sprintNameEnd = sprint.indexOf(',', sprintNameStart);
+          sprintName=sprint.substring(sprintNameStart, sprintNameEnd);
+        } catch (ignore) {
+        }
 
 
         shape = fields.issuetype.name === 'Task' ? "rect" : 
@@ -155,7 +163,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
           '\' width=\'16\' height=\'16\' ><span><a href=\'/browse/' + issue_key + 
           '\'class=\'issue-link link-title\'>' + issue_key +
           '</a> ' + fields.customfield_10002 + '<br><span class=\'link-summary\'>' + summary + 
-          '</span>' + assigneeString +           
+          '</span>' + assigneeString +  
+          '</span><br><span>' + sprintName +
           '</span>", shape="' + shape +
           '", class="' + statusClass + 
           '"]';
