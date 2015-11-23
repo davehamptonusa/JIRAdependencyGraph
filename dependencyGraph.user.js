@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.7.0
+// @version      1.8.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -252,8 +252,6 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
             jQuery.when.apply(window, defChildren).done(function () {
               jqDef.resolve(graph);
             });
-            
-
           });
         } else {
           jqDef.resolve();
@@ -335,7 +333,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
   main = function (epic){
     var options = {}, jira, graphPromise;
     options.jira_url = window.location.origin;
-    options.excludes = ["blocks", "requires", "is related to", "subtask", "duplicates"];
+    options.excludes = ["blocks", "requires", "is related to", "subtask", "duplicates", "Is a company initiative with the following goal/epic(s)", "Is a goal/epic related to the company intiative"];
     //Use the epic if passed in
     
     options.issue = jQuery.type(epic) === "string" ? epic : (window.location.pathname).split("/")[2];
