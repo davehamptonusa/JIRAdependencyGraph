@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.8.1
+// @version      1.8.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -22,18 +22,24 @@
 //
 GM_addStyle('svg {border: 1px solid #999; overflow: hidden; background-color:#fff;float:left;}');
 GM_addStyle('.missingStories dd {margin-left: 4px; font-size: small;}');
-GM_addStyle('.node {  white-space: nowrap; text-align: center}');
-GM_addStyle('.node.open rect,.node.open circle,.node.open ellipse, .node.open diamond {stroke: #333;fill: #78CFFF; stroke-width: 1.5px;}');
-GM_addStyle('.node.blocked rect,.node.blocked circle,.node.blocked ellipse , .node.blocked diamond {stroke: #333;fill: #F62500; stroke-width: 1.5px;}');
-GM_addStyle('.node.inprogress rect,.node.inprogress circle,.node.inprogress ellipse, .node.inprogress diamond  {stroke: #333;fill: #FFB300; stroke-width: 1.5px;}');
-GM_addStyle('.node.resolved rect,.node.resolved circle,.node.resolved ellipse, .node.resolved diamond  {stroke: #333;fill: #7ED321; stroke-width: 1.5px;}');
-GM_addStyle('.node.qa rect,.node.qa circle,.node.qa ellipse, .node.qa diamond  {stroke: #333;fill: #B8E986; stroke-width: 1.5px;}');
-GM_addStyle('.node.qablocked rect,.node.qablocked circle,.node.qablocked ellipse, .node.qablocked diamond  {stroke: #333;fill: #FC927C; stroke-width: 1.5px;}');
-GM_addStyle('.node.closed rect,.node.closed circle,.node.closed ellipse, .node.closed diamond  {stroke: #333;fill: #A6A6A6; stroke-width: 1.5px;}');
-GM_addStyle('.node.pending rect,.node.pending circle,.node.pending ellipse, .node.pending diamond  {stroke: #333;fill: #fff; stroke-width: 1.5px;}');
+GM_addStyle('.node {  white-space: nowrap; text-align: center; color:black}');
+GM_addStyle('.node.toDo rect,.node.toDo circle,.node.toDo ellipse, .node.toDo diamond {stroke: #333;fill: #0072C6; stroke-width: 1.5px;}');
+GM_addStyle('.node.inProgress rect,.node.inProgress circle,.node.inProgress ellipse, .node.inProgress diamond  {stroke: #333;fill: #5DB2FF; stroke-width: 1.5px;}');
+GM_addStyle('.node.blocked rect,.node.blocked circle,.node.blocked ellipse , .node.blocked diamond {stroke: #333;fill: #D24726; stroke-width: 1.5px;}');
+GM_addStyle('.node.codingComplete rect,.node.codingComplete circle,.node.codingComplete ellipse , .node.codingComplete diamond {stroke: #333;fill: #FFCC00; stroke-width: 1.5px;}');
+GM_addStyle('.node.qa rect,.node.qa circle,.node.qa ellipse, .node.qa diamond  {stroke: #333;fill: #DDDDDD; stroke-width: 1.5px;}');
+GM_addStyle('.node.resolved rect,.node.resolved circle,.node.resolved ellipse, .node.resolved diamond  {stroke: #333;fill: #95EF63; stroke-width: 1.5px;}');
+GM_addStyle('.node.closed rect,.node.closed circle,.node.closed ellipse, .node.closed diamond  {stroke: #333;fill: #4FA500; stroke-width: 1.5px;}');
 
 GM_addStyle('.cluster rect {  stroke: #333;  fill: #000;  fill-opacity: 0.1;  stroke-width: 1.5px;}');
 GM_addStyle('.edgePath path.path {  stroke: #333;  stroke-width: 1.5px;  fill: none;}');
+GM_addStyle('.toDo {background-color:#0072C6;}');
+GM_addStyle('.inProgress {background-color:#5DB2FF;}');
+GM_addStyle('.blocked {background-color:#D24726;}');
+GM_addStyle('.codingComplete {background-color:#FFCC00;}');
+GM_addStyle('.qa {background-color:#DDDDDD;}');
+GM_addStyle('.resolved {background-color:#95EF63;}');
+GM_addStyle('.closed {background-color:#4FA500;}');
  
 jQuery.getScript('http://d3js.org/d3.v3.js');
 jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
@@ -74,17 +80,17 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     return self;
   },
   statusClassMap = {
-    "1": 'open',
-    "4": 'open', //This is actually reopened...
-    "10100": 'open', //This is COB "to-do"...
+    "1": 'toDo',
+    "4": 'toDo', //This is actually reopened...
+    "10100": 'toDo', //This is COB "to-do"...
     "10105": 'blocked', // Custom field 'impeded'...
     "5": 'resolved',
-    "12095": 'resolved', //Coding Complete
+    "12095": 'codingComplete', //Coding Complete
     "6": 'closed',
-    "3": 'inprogress',
-    "10104": 'pending',
+    "3": 'inProgress',
+    "10104": 'toDo',
     "10107": 'qa',
-    "10274": 'qablocked'
+    "10274": 'qa'
 
   },
   seen = {},
@@ -267,7 +273,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     return jQuery.when(epicStoriesDef, walkDef);
   },
   print_graph = function (graph_data, epicStories, seen){
-    var svg, inner, zoom, ul,
+    var svg, inner, zoom, ul, sideBar, colorCode,
     graphString = graph_data.join(';\n'),
     render = dagreD3.render(),
     location = jQuery('#graph_container'),
@@ -316,8 +322,18 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       d3.select("#graph_container svg g").call(render, g);  
 
       //Add the missing items
-      jQuery('div.missingStories', location).append('<dl><h3>Missing Stories</h3></dl>');
-      ul = jQuery('dl', location);
+      sideBar = jQuery('div.missingStories', location)
+      sideBar.append('<h3>Color Code</h3><dl class="colorCode"></dl>')
+      colorCode = jQuery('.colorCode', sideBar);
+      colorCode.append('<dt class="toDo">To Do</dt>');
+      colorCode.append('<dt class="inProgress">In Progress</dt>');
+      colorCode.append('<dt class="blocked">Impeded</dt>');
+      colorCode.append('<dt class="codingComplete">Coding Complete</dt>');
+      colorCode.append('<dt class="qa">In QA</dt>');
+      colorCode.append('<dt class="resolved">Ready For Release</dt>');
+      colorCode.append('<dt class="closed">Closed</dt>');
+      sideBar.append('<dl class="missing"><h3>Missing Stories</h3></dl>');
+      ul = jQuery('.missing', sideBar);
       _.each(epicStories, function (value, key) {
         if (_.has(seen, key)) {
           return;
