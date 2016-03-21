@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.8.3
+// @version      2.0.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -45,6 +45,25 @@ jQuery.getScript('http://d3js.org/d3.v3.js');
 jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
 jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
 (function() {
+  AJS.$(document).ready(function() {
+
+    AJS.$('#ghx-issues-in-epic-table tr').each(function() {
+      console.log('Found epic table');
+      var row = this;
+      var issueKey = AJS.$(this).attr("data-issuekey");
+      AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + issueKey, function(data) {
+        console.dir(data.fields.fixVersions);
+        _.each(data.fields.fixVersions, function(fv) {
+          console.log(fv.id + " : " + fv.name);
+
+
+
+          var actions = AJS.$(row).find('td.issue_actions');
+          AJS.$(actions).before('<td class="nav"><a href="/browse/MTMS/fixforversion/' + fv.id + '">' + fv.name + '</a></td>');
+        });
+      });
+    });
+  });
 
   var JiraSearch = function(url) {
       // This factory will create the actual method used to fetch issues from JIRA. This is really just a closure that saves us having
