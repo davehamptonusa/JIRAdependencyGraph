@@ -8,13 +8,15 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.0.0
+// @version      2.1.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
 // @match        https://*.atlassian.net/browse/*-*
 // @match        https://*.atlassian.net/secure/Dashboard*
 // @match        http://jira.cnvrmedia.net/secure/Dashboard*
+// @match        https://*.atlassian.net/secure/RapidBoard*
+// @match        http://jira.cnvrmedia.net/secure/RapidBoard*
 // @grant        GM_addStyle
 // @require	  	 http://code.jquery.com/jquery-latest.js
 // @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
@@ -40,6 +42,8 @@ GM_addStyle('.codingComplete {background-color:#FFCC00;}');
 GM_addStyle('.qa {background-color:#DDDDDD;}');
 GM_addStyle('.resolved {background-color:#95EF63;}');
 GM_addStyle('.closed {background-color:#4FA500;}');
+// Make tracking violations stand out
+GM_addStyle('.ghx-issue-content .ghx-fa {color: red;}');
 
 jQuery.getScript('http://d3js.org/d3.v3.js');
 jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
