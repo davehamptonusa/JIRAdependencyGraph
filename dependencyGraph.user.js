@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.1.0
+// @version      2.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -50,22 +50,23 @@ jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js'
 jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
 (function() {
   AJS.$(document).ready(function() {
-
+    var manBearPig = 0;
+    var manBearPigDeferred = [];
     AJS.$('#ghx-issues-in-epic-table tr').each(function() {
-      console.log('Found epic table');
       var row = this;
       var issueKey = AJS.$(this).attr("data-issuekey");
-      AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + issueKey, function(data) {
-        console.dir(data.fields.fixVersions);
-        _.each(data.fields.fixVersions, function(fv) {
-          console.log(fv.id + " : " + fv.name);
-
-
-
-          var actions = AJS.$(row).find('td.issue_actions');
-          AJS.$(actions).before('<td class="nav"><a href="/browse/MTMS/fixforversion/' + fv.id + '">' + fv.name + '</a></td>');
-        });
-      });
+      manBearPigDeferred.push(
+        AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + issueKey, function(data) {
+          manBearPig += data.fields.customfield_10002;
+          _.each(data.fields.fixVersions, function(fv) {
+            var actions = AJS.$(row).find('td.issue_actions');
+            AJS.$(actions).before('<td class="nav"><a href="/browse/MTMS/fixforversion/' + fv.id + '">' + fv.name + '</a></td>');
+          });
+        })
+      );
+    });
+    AJS.$.when.apply(AJS.$, manBearPigDeferred).then(function() {
+      AJS.$('#greenhopper-epics-issue-web-panel_heading').append('<span> - manBearPig Days: ' + Math.ceil(manBearPig/24) + '</a>');
     });
   });
 
@@ -352,8 +353,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       d3.select("#graph_container svg g").call(render, g);
 
       //Add the missing items
-      sideBar = jQuery('div.missingStories', location)
-      sideBar.append('<h3>Color Code</h3><dl class="colorCode"></dl>')
+      sideBar = jQuery('div.missingStories', location);
+      sideBar.append('<h3>Color Code</h3><dl class="colorCode"></dl>');
       colorCode = jQuery('.colorCode', sideBar);
       colorCode.append('<dt class="toDo">To Do</dt>');
       colorCode.append('<dt class="inProgress">In Progress</dt>');
