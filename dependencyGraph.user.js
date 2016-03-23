@@ -5,10 +5,10 @@
  */
 
 // ==UserScript==
-// @name         JIRAdepenedencyGrpah
+// @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.2
+// @version      2.2.1
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -43,7 +43,7 @@ GM_addStyle('.qa {background-color:#DDDDDD;}');
 GM_addStyle('.resolved {background-color:#95EF63;}');
 GM_addStyle('.closed {background-color:#4FA500;}');
 // Make tracking violations stand out
-GM_addStyle('.ghx-issue-content .ghx-fa {color: red;}');
+GM_addStyle('.ghx-issue-content .ghx-fa, [data-tooltip*=" 0"] {color: red;}');
 
 jQuery.getScript('http://d3js.org/d3.v3.js');
 jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
