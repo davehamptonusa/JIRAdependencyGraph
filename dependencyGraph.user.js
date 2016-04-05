@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.2.1
+// @version      2.2.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -172,6 +172,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
             summary = fields.summary,
             sprint, sprintNameStart, sprintNameEnd, sprintName = "",
             statusClass = (_.isUndefined(fields.status.id)) ? 'open' : statusClassMap[fields.status.id];
+            // Set undefined to ToDo for class so it draws in toDo style
+            statusClass = statusClass || 'toDo';
 
           console.log("processing Node: " + issue_key);
           assigneeString = (_.isNull(fields.assignee)) ? '' :
