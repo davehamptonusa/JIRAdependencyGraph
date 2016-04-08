@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.2.2
+// @version      2.3.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -50,6 +50,7 @@ jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js'
 jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
 (function() {
   AJS.$(document).ready(function() {
+    var project = /\w*/;
     var manBearPig = 0;
     var manBearPigDeferred = [];
     AJS.$('#ghx-issues-in-epic-table tr').each(function() {
@@ -57,7 +58,15 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       var issueKey = AJS.$(this).attr("data-issuekey");
       manBearPigDeferred.push(
         AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + issueKey, function(data) {
-          manBearPig += data.fields.customfield_10002;
+          switch (project.exec(data.key)[0]) {
+            case "MOBL":
+              manBearPig += (data.fields.customfield_10002/24);
+              break;
+            case "VCM":
+              manBearPig += (data.fields.customfield_10002/5);
+              break;
+            default:
+          }
           _.each(data.fields.fixVersions, function(fv) {
             var actions = AJS.$(row).find('td.issue_actions');
             AJS.$(actions).before('<td class="nav"><a href="/browse/MTMS/fixforversion/' + fv.id + '">' + fv.name + '</a></td>');
@@ -66,7 +75,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       );
     });
     AJS.$.when.apply(AJS.$, manBearPigDeferred).then(function() {
-      AJS.$('#greenhopper-epics-issue-web-panel_heading').append('<span> - manBearPig Days: ' + Math.ceil(manBearPig/24) + '</a>');
+      AJS.$('#greenhopper-epics-issue-web-panel_heading').append('<span> - manBearPig Days: ' + Math.ceil(manBearPig) + '</a>');
     });
   });
 
