@@ -1,7 +1,7 @@
 /* jslint undef: true, evil: true, browser: true, unparam: true, sloppy: true, white: true, nomen: true, regexp: true, maxerr: 50, plusplus: true, indent: 4 */
 /* global jQuery, GM_addStyle */
 /*
- * Copyright 2015  Dave Hampton  All rights reserved
+ * Copyright 2015-2016  Dave Hampton  All rights reserved
  */
 
 // ==UserScript==
