@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.4.1
+// @version      2.4.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -109,7 +109,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + epicKey, function(data) {
         var listedFixVersionsInEpic = _.pluck(data.fields.fixVersions, 'name');
         var missingFixVersions = _.difference(_.keys(listedEpics),listedFixVersionsInEpic);
-        if (missingFixVersions) {
+        if (missingFixVersions.length) {
           AJS.$('strong:contains("Fix Version/s:")', '#issuedetails')
           .css('color', 'red')
           .click(function() {
