@@ -107,7 +107,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     AJS.$.when.apply(this, manBearPigDeferred).done(function() {
       // Indicate that the fixVersion is wrong
       AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + epicKey, function(data) {
-        var listedFixVersionsInEpic = _.pluck(data.fields.fixVersions, 'fv.name');
+        var listedFixVersionsInEpic = _.pluck(data.fields.fixVersions, 'name');
         var missingFixVersions = _.difference(_.keys(listedEpics),listedFixVersionsInEpic);
         if (missingFixVersions) {
           AJS.$('strong:contains("Fix Version/s:")', '#issuedetails')
