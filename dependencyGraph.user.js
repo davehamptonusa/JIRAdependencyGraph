@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.3.0
+// @version      2.4.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -50,32 +50,119 @@ jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js'
 jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
 (function() {
   AJS.$(document).ready(function() {
+    //Only run this on Epics
+    if (!(AJS.$('#type-val').text().match('Epic'))) {
+      return;
+    }
     var project = /\w*/;
     var manBearPig = 0;
-    var manBearPigDeferred = [];
+    var manBearPigDeferred = [AJS.$.Deferred()];
+    var latestDateHashMap = {};
+    var latestDateDeferred = [AJS.$.Deferred()];
+    var listedEpics = {};
+    var epicKey;
     AJS.$('#ghx-issues-in-epic-table tr').each(function() {
+      var thisManDeferred = AJS.$.Deferred();
       var row = this;
       var issueKey = AJS.$(this).attr("data-issuekey");
-      manBearPigDeferred.push(
-        AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + issueKey, function(data) {
-          switch (project.exec(data.key)[0]) {
-            case "MOBL":
-              manBearPig += (data.fields.customfield_10002/24);
-              break;
-            case "VCM":
-              manBearPig += (data.fields.customfield_10002/5);
-              break;
-            default:
+      manBearPigDeferred.push(thisManDeferred);
+      AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + issueKey, function(data) {
+        _.each(data.fields.fixVersions, function(fv){
+          var thisFixVersionDeferred;
+          listedEpics[fv.name] = 1;
+          if (!_.contains(_.keys(latestDateHashMap), fv.id)){
+            thisFixVersionDeferred = AJS.$.Deferred();
+            latestDateDeferred.push(thisFixVersionDeferred);
+            // Now that we have a real one we can discard the place holder
+            // And it doesn't matter if we keep discarding it...
+            latestDateDeferred[0].resolve();
+              latestDateHashMap[fv.id] = {
+                name: fv.id,
+              };
+              AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/version/' + fv.id, function(details) {
+                latestDateHashMap[fv.id].date = new Date(details.releaseDate);
+                thisFixVersionDeferred.resolve();
+              });
           }
-          _.each(data.fields.fixVersions, function(fv) {
-            var actions = AJS.$(row).find('td.issue_actions');
-            AJS.$(actions).before('<td class="nav"><a href="/browse/MTMS/fixforversion/' + fv.id + '">' + fv.name + '</a></td>');
-          });
-        })
-      );
+        });
+        switch (project.exec(data.key)[0]) {
+          case "MOBL":
+            manBearPig += (data.fields.customfield_10002/24);
+            break;
+          case "VCM":
+            manBearPig += (data.fields.customfield_10002/5);
+            break;
+          default:
+        }
+        _.each(data.fields.fixVersions, function(fv) {
+          var actions = AJS.$(row).find('td.issue_actions');
+          AJS.$(actions).before('<td class="nav"><a href="/browse/MTMS/fixforversion/' + fv.id + '">' + fv.name + '</a></td>');
+        });
+        thisManDeferred.resolve();
+      });
     });
-    AJS.$.when.apply(AJS.$, manBearPigDeferred).then(function() {
+    epicKey = AJS.$("#key-val").attr('data-issue-key');
+    // resolve the kickoff deferred
+    manBearPigDeferred[0].resolve();
+    AJS.$.when.apply(this, manBearPigDeferred).done(function() {
+      // Indicate that the fixVersion is wrong
+      AJS.$.getJSON(AJS.contextPath() + '/rest/api/latest/issue/' + epicKey, function(data) {
+        var listedFixVersionsInEpic = _.pluck(data.fields.fixVersions, 'fv.name');
+        var missingFixVersions = _.difference(_.keys(listedEpics),listedFixVersionsInEpic);
+        if (missingFixVersions) {
+          AJS.$('strong:contains("Fix Version/s:")', '#issuedetails')
+          .css('color', 'red')
+          .click(function() {
+            alert('You seem to be missing the following fixVersions: ' + missingFixVersions.join(', '));
+          });
+        }
+      });
       AJS.$('#greenhopper-epics-issue-web-panel_heading').append('<span> - manBearPig Days: ' + Math.ceil(manBearPig) + '</a>');
+      AJS.$.when.apply(this, latestDateDeferred).done(function() {
+        var msg, msgResult, projectedEndDate, validEpicStatus;
+        var latestDate = _.max(latestDateHashMap, function (val){
+          if (!isNaN(val.date.getTime())){
+            return Date.now(val.date);
+          }
+          else {
+            return 0;
+          }
+        });
+        // See if it has a project end date and if so check the date to highlite red if inaccurate
+        if (_.find(latestDateHashMap, function (val) {
+          return isNaN(val.date.getTime());
+        })) {
+          msgResult = " But it can't be calculated because some fixVersions don't have release dates.";
+        } else {
+          msgResult = ' It should be: ' + latestDate.date.toLocaleDateString();
+        }
+        projectedEndDate = AJS.$('#customfield_13057-val span time').attr('datetime');
+        //If the Epic isn't in In Progress or deployed message it shouldn't have an projectedEndDate
+        validEpicStatus = /(?=In Progress)|(?=Deploy)/.test(AJS.$("#status-val span").text());
+        if (!projectedEndDate && validEpicStatus) {
+          msg = 'This Epic needs a Projected End Date.';
+        } else {
+          if (!validEpicStatus && projectedEndDate){
+            msg = "Really!? It hasn't even been approved or scheduled. I'll remind you to set this when it's In Pogress.";
+            msgResult = "";
+          }
+          else {
+            correctedDate  = projectedEndDate.split('-');
+            correctedDate.push(correctedDate.shift());
+
+            if (new Date(correctedDate.join('/')).toLocaleDateString() !== latestDate.date.toLocaleDateString()) {
+              msg = 'This Epic has an incorrect End Date.';
+            }
+          }
+        }
+        if (msg) {
+          AJS.$('.dates>dt:contains("Projected Development Complete Date:")')
+          .css('color', 'red')
+          .click(function() {
+            alert(msg + msgResult);
+          });
+        }
+      });
     });
   });
 
