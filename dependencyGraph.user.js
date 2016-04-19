@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.4.2
+// @version      2.4.3
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/*-*
@@ -93,6 +93,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
             manBearPig += (data.fields.customfield_10002/5);
             break;
           default:
+            manBearPig += (data.fields.customfield_10002/24);
+            break;
         }
         _.each(data.fields.fixVersions, function(fv) {
           var actions = AJS.$(row).find('td.issue_actions');
