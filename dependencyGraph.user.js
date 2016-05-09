@@ -8,18 +8,18 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.4.3
+// @version      2.5.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
-// @match        http://jira.cnvrmedia.net/browse/*-*
+// @match        http*://jira.cnvrmedia.net/browse/*-*
 // @match        https://*.atlassian.net/browse/*-*
 // @match        https://*.atlassian.net/secure/Dashboard*
-// @match        http://jira.cnvrmedia.net/secure/Dashboard*
+// @match        http*://jira.cnvrmedia.net/secure/Dashboard*
 // @match        https://*.atlassian.net/secure/RapidBoard*
-// @match        http://jira.cnvrmedia.net/secure/RapidBoard*
+// @match        http*://jira.cnvrmedia.net/secure/RapidBoard*
 // @grant        GM_addStyle
-// @require	  	 http://code.jquery.com/jquery-latest.js
-// @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
+// @require	  	 https://code.jquery.com/jquery-latest.js
+// @require      https://secure-cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
 // ==/UserScript==
 //
 GM_addStyle('svg {border: 1px solid #999; overflow: hidden; background-color:#fff;float:left;}');
@@ -45,9 +45,9 @@ GM_addStyle('.closed {background-color:#4FA500;}');
 // Make tracking violations stand out
 GM_addStyle('.ghx-issue-content .ghx-fa, [data-tooltip*=" 0"] {color: red;}');
 
-jQuery.getScript('http://d3js.org/d3.v3.js');
-jQuery.getScript('http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
-jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
+jQuery.getScript('https://d3js.org/d3.v3.js');
+jQuery.getScript('https://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
+jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
 (function() {
   AJS.$(document).ready(function() {
     //Only run this on Epics
