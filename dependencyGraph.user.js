@@ -223,7 +223,7 @@ jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphli
     seen = {},
     build_graph_data = function(start_issue_key, jira, excludes) {
       // Given a starting image key and the issue-fetching function build up the GraphViz data representing relationships
-      // between issues. This will consider both subtasks and issue links.
+      // between issues. This will issue links.
 
       var get_key = function(issue) {
           return issue.key;
@@ -342,13 +342,13 @@ jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphli
               _.each(result.issues, function(epicIssue) {
                 epicStories[epicIssue.key] = epicIssue.fields.summary;
               });
-              jqDef.resolve(epicStories);
+              jqDef.resolve(epicStories, epicId);
             });
           });
           return jqDef;
 
         },
-        walk = function(issue_key, graph) {
+        walk = function(issue_key, graph, epicId) {
           // issue is the JSON representation of the issue """
           var request,
             jqDef = jQuery.Deferred();
@@ -370,18 +370,21 @@ jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphli
                 _.each(fields.issuelinks, function(other_link) {
                   result = process_link(issue_key, other_link);
                   if (result !== null) {
-                    if (!_.has(seen, result[0])) {
+                    // Follow children if we've havnn't already seen it - if its an Epic that isn't the Epic we started with
+                    console.log("processing: " + issue_key + " child: " + result[0] + " epic: " + epicId);
+                    if (!_.has(seen, result[0]) && (fields.issuetype.name !== "Epic" || issue_key === epicId)){
                       children.push(result[0]);
+                      console.log("folowing: " + result[0]);
                     }
                     if (result[1] !== null) {
                       graph.push(result[1]);
                     }
-                  }
+                  }console.warn();
                 });
               }
               // now construct graph data for all subtasks and links of this issue
               _.each(children, function(child) {
-                var defChild = walk(child, graph);
+                var defChild = walk(child, graph, epicId);
                 defChildren.push(defChild);
               });
               //} Other half of if
@@ -400,8 +403,14 @@ jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphli
       seen = {};
 
       epicStoriesDef = getEpicStories(start_issue_key);
-      walkDef = walk(start_issue_key, []);
-      return jQuery.when(epicStoriesDef, walkDef);
+        epicStoriesDef.done(function(epicStories, epicId) {
+            console.log("This is the EPIC ID!" + epicId);
+            walkDef = walk(epicId, [], epicId)
+            .done(function (graph) {
+              buildGraphDef.resolve(epicStories, graph);
+            });
+        });
+      return buildGraphDef.promise();
     },
     print_graph = function(graph_data, epicStories, seen) {
       var svg, inner, zoom, ul, sideBar, colorCode,
@@ -481,7 +490,9 @@ jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphli
       var options = {},
         jira, graphPromise;
       options.jira_url = window.location.origin;
-      options.excludes = ["blocks", "is related to", "subtask", "duplicates", "Is a company initiative with the following goal/epic(s)", "Is a goal/epic related to the company intiative"];
+      options.excludes = ["blocks", "is related to", "subtask", "duplicates",
+        "Is a company initiative with the following goal/epic(s)", "Is a goal/epic related to the company intiative",
+        "Cloned From", "Cloned To"];
       //Use the epic if passed in
 
       options.issue = jQuery.type(epic) === "string" ? epic : (window.location.pathname).split("/")[2];
