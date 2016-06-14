@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.5.0
+// @version      2.5.1
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http*://jira.cnvrmedia.net/browse/*-*
@@ -87,13 +87,14 @@ jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphli
         });
         switch (project.exec(data.key)[0]) {
           case "MOBL":
+          case "MTMS":
             manBearPig += (data.fields.customfield_10002/24);
             break;
           case "VCM":
             manBearPig += (data.fields.customfield_10002/5);
             break;
           default:
-            manBearPig += (data.fields.customfield_10002/24);
+            manBearPig += (data.fields.customfield_10002/1);
             break;
         }
         _.each(data.fields.fixVersions, function(fv) {
