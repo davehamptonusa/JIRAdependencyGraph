@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.5.1
+// @version      2.5.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http*://jira.cnvrmedia.net/browse/*-*
@@ -46,8 +46,8 @@ GM_addStyle('.closed {background-color:#4FA500;}');
 GM_addStyle('.ghx-issue-content .ghx-fa, [data-tooltip*=" 0"] {color: red;}');
 
 jQuery.getScript('https://d3js.org/d3.v3.js');
-jQuery.getScript('https://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js');
-jQuery.getScript('https://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js');
+jQuery.getScript('https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.4.17/dagre-d3.core.min.js');
+jQuery.getScript('https://secure.cdn.fastclick.net/content/adv/aids/999/29999/graphlib-dot.js');
 (function() {
   AJS.$(document).ready(function() {
     //Only run this on Epics
