@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.5.3
+// @version      2.5.4
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http*://jira.cnvrmedia.net/browse/*-*
@@ -88,6 +88,8 @@ jQuery.getScript('https://secure.cdn.fastclick.net/content/adv/aids/999/29999/gr
         switch (project.exec(data.key)[0]) {
           case "MOBL":
           case "MTMS":
+          case "VBOX":
+          case "CL":
             manBearPig += (data.fields.customfield_10002/24);
             break;
           case "VCM":
