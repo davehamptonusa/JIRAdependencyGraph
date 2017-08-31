@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.5.4
+// @version      2.5.5
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http*://jira.cnvrmedia.net/browse/*-*
@@ -493,7 +493,7 @@ jQuery.getScript('https://secure.cdn.fastclick.net/content/adv/aids/999/29999/gr
       var options = {},
         jira, graphPromise;
       options.jira_url = window.location.origin;
-      options.excludes = ["blocks", "is related to", "subtask", "duplicates",
+      options.excludes = ["blocks", "is related to", "subtask", "duplicates", "relates to", "causes", "is caused by",
         "Is a company initiative with the following goal/epic(s)", "Is a goal/epic related to the company intiative",
         "Cloned From", "Cloned To"];
       //Use the epic if passed in
