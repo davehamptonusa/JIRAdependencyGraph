@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.5.5
+// @version      2.5.6
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http*://jira.cnvrmedia.net/browse/*-*
@@ -22,7 +22,7 @@
 // @require      https://secure-cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
 // ==/UserScript==
 //
-GM_addStyle('svg {border: 1px solid #999; overflow: hidden; background-color:#fff;float:left;}');
+GM_addStyle('#graph_container svg {border: 1px solid #999; overflow: hidden; background-color:#fff;float:left;}');
 GM_addStyle('.missingStories dd {margin-left: 4px; font-size: small;}');
 GM_addStyle('.node {  white-space: nowrap; text-align: center; color:black}');
 GM_addStyle('.node.toDo rect,.node.toDo circle,.node.toDo ellipse, .node.toDo diamond {stroke: #333;fill: #0072C6; stroke-width: 1.5px;}');
