@@ -8,7 +8,7 @@
 // @name         JIRAdepenedencyGraph
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      2.5.6
+// @version      2.6.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http*://jira.cnvrmedia.net/browse/*-*
@@ -220,7 +220,9 @@ jQuery.getScript('https://secure.cdn.fastclick.net/content/adv/aids/999/29999/gr
       "3": 'inProgress',
       "10104": 'toDo',
       "10107": 'qa',
-      "10274": 'qa'
+      "10274": 'qa',
+      "13189": 'resolved',
+      "10101": 'resolved'
 
     },
     seen = {},
